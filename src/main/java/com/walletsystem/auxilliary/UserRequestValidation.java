@@ -44,13 +44,17 @@ public class UserRequestValidation {
 
             var checkPhoneNo = userRepository.findByPhoneNumber(request.getPhoneNumber()).orElse(null);
             if (checkPhoneNo != null) {
-                return ResponseEntity.ok(StandardResponse.error("user with this phoneNumber already existed"));
+                return ResponseEntity.badRequest().body(StandardResponse.error("user with this phoneNumber already existed"));
             }
 
-            var checkUser = userRepository.findByEmailOrUserName
-                    (request.getEmail(), request.getUserName()).orElse(null);
-            if (checkUser != null) {
-                return ResponseEntity.ok(StandardResponse.error("User with this email or username already existed"));
+            var checkEmail = userRepository.findByEmail(request.getEmail()).orElse(null);
+            if (checkEmail != null) {
+                return ResponseEntity.badRequest().body(StandardResponse.error("User with this email already existed"));
+            }
+
+            var checkUsername = userRepository.findByUserName(request.getUserName()).orElse(null);
+            if (checkUsername != null) {
+                return ResponseEntity.badRequest().body(StandardResponse.error("User with this username already existed"));
             }
         }
 

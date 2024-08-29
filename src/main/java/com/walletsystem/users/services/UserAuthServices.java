@@ -8,6 +8,7 @@ import com.walletsystem.auxilliary.UserRequestValidation;
 import com.walletsystem.common.MessagingException;
 import com.walletsystem.common.StandardResponse;
 import com.walletsystem.config.JwtService;
+import com.walletsystem.users.dto.AccountKeyGenResponse;
 import com.walletsystem.users.dto.AuthenticationResponse;
 import com.walletsystem.users.dto.UserRequest;
 import com.walletsystem.users.models.Token;
@@ -59,6 +60,7 @@ public class UserAuthServices {
     private final WalletRepository walletRepository;
     private final Utility utility;
     private final BankDetailRepository bankDetailRepository;
+    private final AccountKeyGenService accountKeyGenService;
 
     public ResponseEntity<?> register(UserRequest request) {
         //User Registration
@@ -144,21 +146,26 @@ public class UserAuthServices {
                     .setTest(true)
                     .build();
 
+            AccountKeyGenResponse accountKeyGenResponse = accountKeyGenService.getAccountKeyGen();
+
             // Create a virtual account
             RegisterPersistentPaymentAccountRequest request = RegisterPersistentPaymentAccountRequest.builder()
-                    .referenceNumber("test12345100zz3")
+                    .referenceNumber(accountKeyGenResponse.getReferenceNumber())
                     .phoneNumber(registration.getPhoneNumber())
                     .accountName(registration.getFirstName() + " " + registration.getLastName())
                     .firstName(registration.getFirstName())
                     .lastName(registration.getLastName())
-                    .accountReference("0121111111116")
+                    .accountReference(accountKeyGenResponse.getAccountReference())
                     .financialIdentificationNumber("22222222222")
                     .creditBankId("3E94C4BC-6F9A-442F-8F1A-8214478D5D86")
                     .creditBankAccountNumber("0000000000")
                     .callbackUrl("")
                     .build();
-            //2513073759
 
+            //store referenceNumber and accountReference
+            accountKeyGenService.createAccountKeyGen(accountKeyGenResponse.getReferenceNumber(),
+                    accountKeyGenResponse.getAccountReference()
+            );
 
             RegisterPersistentPaymentAccountResponse response = collect.registerPersistentPaymentAccount(request);
 

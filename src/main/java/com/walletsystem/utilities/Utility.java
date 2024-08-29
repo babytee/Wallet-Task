@@ -17,6 +17,37 @@ import java.util.regex.Pattern;
 public class Utility {
 
 
+    private static final String REFERENCE_NUMBER_PREFIX = "test";
+    private static final String ACCOUNT_REFERENCE_PREFIX = "012";
+
+    private static final Random RANDOM = new Random();
+
+    public static String generateReferenceNumber() {
+        return REFERENCE_NUMBER_PREFIX + generateRandomDigits(5) + generateRandomAlphabets(2) + generateRandomDigits(1);
+    }
+
+    public static String generateAccountReference() {
+        return ACCOUNT_REFERENCE_PREFIX + generateRandomDigits(9);
+    }
+
+    private static String generateRandomDigits(int length) {
+        StringBuilder digits = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            digits.append(RANDOM.nextInt(10));
+        }
+        return digits.toString();
+    }
+
+    private static String generateRandomAlphabets(int length) {
+        StringBuilder alphabets = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            char letter = (char) ('a' + RANDOM.nextInt(26));
+            alphabets.append(letter);
+        }
+        return alphabets.toString();
+    }
+
+
     public boolean isInputValid(String input, String regex) {
         return Pattern.compile(regex).matcher(input).matches();
     }
@@ -39,39 +70,6 @@ public class Utility {
         return matcher.matches();
     }
 
-    public String generateUniqueId() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-        String timestamp = dateFormat.format(new Date());
-        Random random = new Random();
-        int randomNum = random.nextInt(1000);
-        String uniqueId = timestamp + String.format("%03d", randomNum);
-        return uniqueId;
-    }
-
-    public String generateUniqueRefNumber() {
-        // You can customize the format of the invoice reference number based on your requirements
-        // For example, using the current timestamp and a random UUID
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        String uuid = UUID.randomUUID().toString().replace("-", "").substring(0, 8); // Use a portion of the UUID
-
-        return "wa-" + timestamp + "-" + uuid;
-    }
-
-    public  String generateReferenceNumber() {
-        // Generate a random UUID and convert it to a string
-        String uuid = UUID.randomUUID().toString().replace("-", ""); // Remove hyphens
-
-        // Ensure the length is between 12 and 30 characters
-        if (uuid.length() < 12) {
-            // Append random numbers to ensure minimum length
-            uuid = String.format("%-12s", uuid).replace(' ', '0');
-        } else if (uuid.length() > 30) {
-            // Truncate to ensure maximum length
-            uuid = uuid.substring(0, 30);
-        }
-
-        return uuid;
-    }
 
     public double roundAmount(double value) {
         BigDecimal bd = new BigDecimal(Double.toString(value));
