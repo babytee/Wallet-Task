@@ -55,17 +55,16 @@ public class WalletService {
             return ResponseEntity.internalServerError().
                     body(StandardResponse.error("User not authenticated"));
         }
-        var receiverInfo = userInfoService.getUserById(request.getReceiverId());
-        var senderInfo = userInfoService.getUserById(request.getSenderId());
+
+        var receiverInfo = userInfoService.getUserPagaBank(request.getAccountNumber());
         if (receiverInfo == null) {
-            return ResponseEntity.ok(StandardResponse.error("receiverId can not be null"));
-        } else if (senderInfo == null) {
-            return ResponseEntity.ok(StandardResponse.error("senderId can not be null"));
+            return ResponseEntity.ok(StandardResponse.error("accountNumber is null or not found"));
         }
 
-        Wallet sender = walletRepository.findByUser(senderInfo)
+        Wallet sender = walletRepository.findByUser(user)
                 .orElse(null);
-        Wallet receiver = walletRepository.findByUser(receiverInfo)
+
+        Wallet receiver = walletRepository.findByUser(receiverInfo.getUser())
                 .orElse(null);
 
         if (sender == null) {
@@ -147,6 +146,59 @@ public class WalletService {
         String fullName = lname + " " + fname;
 
         BankDetail bankDetail = optionalBankDetail.get();
+        BankDetailRequest bankDetailRequest = BankDetailRequest.builder()
+                .id(bankDetail.getId())
+                .accountNumber(bankDetail.getAccountNumber())
+                .accountName(fullName)
+                .userDetails(userInfoService.getAuthProfile())
+                .build();
+
+        return ResponseEntity.ok(StandardResponse.success(bankDetailRequest));
+    }
+
+    public ResponseEntity<?> getWalletBankList() {
+        var user = userInfoService.getAuthenticatedUser();
+        if (user == null) {
+            return ResponseEntity.internalServerError().
+                    body(StandardResponse.error("User not authenticated"));
+        }
+
+        List<BankDetail> bankDetails = bankDetailRepository.findAll();
+        String fname = userInfoService.getAuthProfile().getFirstName();
+        String lname = userInfoService.getAuthProfile().getLastName();
+        String fullName = lname + " " + fname;
+
+        List<BankDetailRequest> bankDetailRequests = bankDetails.stream().map(
+                bankDetail -> {
+                    return BankDetailRequest.builder()
+                           .id(bankDetail.getId())
+                            .bankName(bankDetail.getBankName())
+                           .accountNumber(bankDetail.getAccountNumber())
+                           .accountName(fullName)
+                           .build();
+                }
+        ).collect(Collectors.toList());
+
+
+        return ResponseEntity.ok(StandardResponse.success(bankDetailRequests));
+    }
+
+    public ResponseEntity<?> verifyWalletAccount(String accountNumber) {
+        var user = userInfoService.getAuthenticatedUser();
+        if (user == null) {
+            return ResponseEntity.internalServerError().
+                    body(StandardResponse.error("User not authenticated"));
+        }
+
+        BankDetail bankDetail = bankDetailRepository.
+                findByAccountNumber(accountNumber).orElse(null);
+        if(bankDetail == null){
+            return ResponseEntity.ok(StandardResponse.error("accountNumber is empty or cannot be found"));
+        }
+        String fname = userInfoService.getAuthProfile().getFirstName();
+        String lname = userInfoService.getAuthProfile().getLastName();
+        String fullName = lname + " " + fname;
+
         BankDetailRequest bankDetailRequest = BankDetailRequest.builder()
                 .id(bankDetail.getId())
                 .accountNumber(bankDetail.getAccountNumber())

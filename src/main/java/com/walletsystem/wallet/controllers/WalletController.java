@@ -32,4 +32,15 @@ public class WalletController {
     public ResponseEntity<?> getBankDetails() {
         return walletService.getBankDetails();
     }
+
+    @GetMapping("verify_wallet_account")
+    public ResponseEntity<?> verifyWalletAccount(@RequestParam String accountNumber) {
+        return walletService.verifyWalletAccount(accountNumber);
+    }
+
+    @GetMapping("get_wallet_bank_list")
+    public ResponseEntity<?> getWalletBankList() {
+        return walletService.getWalletBankList();
+    }
+
 }

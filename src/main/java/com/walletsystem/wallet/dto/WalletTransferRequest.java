@@ -13,8 +13,7 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WalletTransferRequest {
     private Long id;
-    private Long receiverId;//from User entity
-    private Long senderId;//from User entity
+    private String accountNumber;//from User entity
     private Double amount;
     private String purpose;
     private String remarks;
